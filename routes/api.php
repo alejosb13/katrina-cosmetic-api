@@ -171,7 +171,7 @@ Route::get('list/productos-clientes', [ListadosPaginasController::class, 'Factur
 Route::get('list/producto-vendedor', [ListadosPaginasController::class, 'ProductosVendedorList']);
 
 Route::get('configuracion/crons', function () {
-    // Artisan::call('meta:recuperacion');
+    Artisan::call('meta:recuperacion');
     // echo Artisan::output();
 });
 Route::get('configuracion/clear-cache', function () {

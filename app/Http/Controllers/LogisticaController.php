@@ -440,7 +440,7 @@ class LogisticaController extends Controller
                     $reciboHistorial = $reciboHistorial->where('numero', '>=', $request->numRecibo);
                 }
             }
-
+            // print_r(json_encode(['created_at', [$dateIni->toDateString() . " 00:00:00",  $dateFin->toDateString() . " 23:59:59"]]));
             $recibo->recibo_historial = $reciboHistorial->get();
 
             if (count($recibo->recibo_historial) > 0) {
@@ -461,19 +461,18 @@ class LogisticaController extends Controller
                         $fechaCreacionAbono = $recibo_historial->factura_historial->created_at;
                         $inicioMesActual =  Carbon::parse($fechaCreacionAbono)->firstOfMonth()->toDateString();
                         $finMesActual =  Carbon::parse($fechaCreacionAbono)->lastOfMonth()->toDateString();
+                        // print_r(json_encode($fechaCreacionAbono));
 
                         $porcentajeIncentivo = IncentivosHistorial::whereBetween('fecha_indice', [$inicioMesActual . " 00:00:00",  $finMesActual . " 23:59:59"])->where('user_id', $userId)->first();
                         if ($porcentajeIncentivo) {
                             $response["porcentaje"] = $porcentajeIncentivo->porcentaje ? ($porcentajeIncentivo->porcentaje  / 100) :  0.18;
                         } else {
-                            $ultimoPorcentaje = IncentivosHistorial::where([["user_id", "=", $userId]])->orderBy('created_at', 'desc')->first();
-                            $response["porcentaje"] = ($ultimoPorcentaje) ? ($ultimoPorcentaje->porcentaje / 100) :  0.18;
+                            // $ultimoPorcentaje = IncentivosHistorial::where([["user_id", "=", $userId]])->orderBy('created_at', 'desc')->first();
+                            $ultimoPorcentaje = crearIncentivosHistorial($inicioMesActual . " 10:00:00", $userId);
+                            $response["porcentaje"] = $ultimoPorcentaje->porcentaje / 100;
                         }
-                        // print_r(json_encode($response["porcentaje"]));
                         $response["total_credito"] += decimal($recibo_historial->factura_historial->precio * $response["porcentaje"]);
                         $response["total"] += decimal($recibo_historial->factura_historial->precio);
-                            // print_r(json_encode( $response["total_credito"]));
-
                     }
                 }
             }
@@ -516,12 +515,12 @@ class LogisticaController extends Controller
                         $fechaCreacionAbono = $recibo_historial_contado->factura->created_at;
                         $inicioMesActual =  Carbon::parse($fechaCreacionAbono)->firstOfMonth()->toDateString();
                         $finMesActual =  Carbon::parse($fechaCreacionAbono)->lastOfMonth()->toDateString();
-
                         $porcentajeIncentivo = IncentivosHistorial::whereBetween('fecha_indice', [$inicioMesActual . " 00:00:00",  $finMesActual . " 23:59:59"])->where('user_id', $userId)->first();
                         if ($porcentajeIncentivo) {
                             $response["porcentaje"] = ($porcentajeIncentivo->porcentaje / 100);
                         } else {
-                            $ultimoPorcentaje = IncentivosHistorial::where([["user_id", "=", $userId]])->orderBy('created_at', 'desc')->first();
+                            // $ultimoPorcentaje = IncentivosHistorial::where([["user_id", "=", $userId]])->orderBy('created_at', 'desc')->first();
+                            $ultimoPorcentaje = crearIncentivosHistorial($inicioMesActual . " 10:00:00", $userId);
                             $response["porcentaje"] = ($ultimoPorcentaje->porcentaje / 100);
                         }
 
@@ -544,7 +543,7 @@ class LogisticaController extends Controller
             // }
 
             // $response["porcentaje20"]  = decimal($response["total"] * $porcentajeIncentivo->porcentaje);
-            
+
             $response["porcentaje20"]  = decimal($response["total_contado"] + $response["total_credito"]);
             $response["recibo"]        = $recibo;
             // $response["porcentaje"] =  $response["porcentaje"] *100;

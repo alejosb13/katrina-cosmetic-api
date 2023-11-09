@@ -141,13 +141,13 @@ class IncentivoHistorialController extends Controller
                 if ($validation->fails()) {
                     $response[] = $validation->errors();
                 } else {
-                    $inicioMesActual =  Carbon::parse($request['fecha_indice'])->firstOfMonth()->toDateString();
-                    $finMesActual =  Carbon::parse($request['fecha_indice'])->lastOfMonth()->toDateString();
-                    $existeCoincidencia = IncentivosHistorial::whereBetween('fecha_indice', [$inicioMesActual . " 00:00:00",  $finMesActual . " 23:59:59"])->where([
-                        ["user_id", "=", $request['user_id']],
-                    ])->exists();
+                    // $inicioMesActual =  Carbon::parse($request['fecha_indice'])->firstOfMonth()->toDateString();
+                    // $finMesActual =  Carbon::parse($request['fecha_indice'])->lastOfMonth()->toDateString();
+                    // // $existeCoincidencia = IncentivosHistorial::whereBetween('fecha_indice', [$inicioMesActual . " 00:00:00",  $finMesActual . " 23:59:59"])->where([
+                    // //     ["user_id", "=", $request['user_id']],
+                    // // ])->exists();
 
-                    if (!$existeCoincidencia) { // si no hay coincidencia
+                    // if (!$existeCoincidencia) { // si no hay coincidencia
                         $incentivo->update([
                             'user_id' => $request['user_id'],
                             'porcentaje' => $request['porcentaje'],
@@ -155,9 +155,9 @@ class IncentivoHistorialController extends Controller
                         ]);
                         $response[] = 'Incentivo modificado con exito.';
                         $status = 200;
-                    } else {
-                        $response[] = 'Error al modificar los datos.';
-                    }
+                    // } else {
+                    //     $response[] = 'Error al modificar los datos.';
+                    // }
                 }
             } else {
                 $response[] = "El incentivo no existe.";
